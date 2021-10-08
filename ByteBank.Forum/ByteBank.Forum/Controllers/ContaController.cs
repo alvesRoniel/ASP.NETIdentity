@@ -1,7 +1,11 @@
-﻿using ByteBank.Forum.ViewModels;
+﻿using ByteBank.Forum.Models;
+using ByteBank.Forum.ViewModels;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -17,14 +21,30 @@ namespace ByteBank.Forum.Controllers
         }
 
         [HttpPost]
-        public ActionResult Registrar(ContaRegistrarViewModel modelo)
+        public async Task<ActionResult> Registrar(ContaRegistrarViewModel model)
         {
-            if (modelo is null)
+            if (model is null)
             {
-                throw new ArgumentNullException(nameof(modelo));
+                throw new ArgumentNullException(nameof(model));
             }
 
-            return View();
+            if (ModelState.IsValid)
+            {
+                var dbContext = new IdentityDbContext<UsuarioAplicacao>("DefaultConnection");
+                var userStore = new UserStore<UsuarioAplicacao>(dbContext);
+                var userManager = new UserManager<UsuarioAplicacao>(userStore);
+                var novoUsuario = new UsuarioAplicacao();
+
+                novoUsuario.Email = model.Email;
+                novoUsuario.UserName = model.UserName;
+                novoUsuario.NomeCompleto = model.NomeCompleto;
+
+                await userManager.CreateAsync(novoUsuario, model.Senha);
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(model);
         }
     }
 }
