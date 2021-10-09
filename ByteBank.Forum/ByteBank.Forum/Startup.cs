@@ -34,6 +34,7 @@ namespace ByteBank.Forum
 
                     var userValidator = new UserValidator<UsuarioAplicacao>(userManager);
                     userValidator.RequireUniqueEmail = true;
+
                     userManager.UserValidator = userValidator;
 
                     userManager.PasswordValidator = new SenhaValidador()
@@ -44,6 +45,8 @@ namespace ByteBank.Forum
                         ObrigatorioUpeprCase = true,
                         ObrigatorioCaracteresEspeciais = true
                     };
+
+                    userManager.EmailService = new EmailServico();
 
                     return userManager;
                 });
