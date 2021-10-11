@@ -56,17 +56,49 @@ namespace ByteBank.Forum.Controllers
                 var usuario = await UserManager.FindByEmailAsync(model.Email);
                 var usuarioJaExiste = usuario != null;
 
-                if(usuarioJaExiste) return RedirectToAction("Index", "Home");
+                if (usuarioJaExiste) return View("AguardandoConfirmacao");
 
                 var resultado = await UserManager.CreateAsync(novoUsuario, model.Senha);
 
                 if (resultado.Succeeded)
-                    return RedirectToAction("Index", "Home");
+                {
+                    await EviarEmailDeConfirmacao(novoUsuario);
+                    return View("AguardandoConfirmacao");
+                }
                 else
                     AdicionarErros(resultado);
             }
 
             return View(model);
+        }
+
+        public async Task<ActionResult> ConfirmacaoEmail(string usuarioId, string token)
+        {
+            if (usuarioId == null || token == null) return View("Error");
+
+            var resultado = await UserManager.ConfirmEmailAsync(usuarioId, token);
+
+            if (resultado.Succeeded)
+                return RedirectToAction("Index", "Home");
+            else
+                return View("Error");
+        }
+
+        private async Task EviarEmailDeConfirmacao(UsuarioAplicacao usuario)
+        {
+            var token = await UserManager.GenerateEmailConfirmationTokenAsync(usuario.Id);
+
+            var linkDeCallBack =
+                Url.Action(
+                    "ConfirmacaoEmail",
+                    "Conta",
+                    new { usuarioId = usuario.Id, token = token },
+                    Request.Url.Scheme);
+
+            await UserManager.SendEmailAsync(
+                usuario.Id,
+                "Fórum ByteBank - Confirmação de E-mail",
+                $"Bem vindo ao fórum ByteBank, clique aqui {linkDeCallBack} para confirmar seu e-mail!");
         }
 
         private void AdicionarErros(IdentityResult resultado)

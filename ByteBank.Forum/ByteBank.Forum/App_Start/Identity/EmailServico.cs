@@ -10,15 +10,18 @@ namespace ByteBank.Forum.App_Start.Identity
     {
         private readonly string EMAIL_ORIGEM = ConfigurationManager.AppSettings["emailServico:email_remetente"];
         private readonly string EMAIL_SENHA = ConfigurationManager.AppSettings["emailServico:email_senha"];
+        private readonly string EMAIL_SENHA_teste = ConfigurationManager.AppSettings["emailServico:email_senha"];
+        
 
         public async Task SendAsync(IdentityMessage message)
         {
             using (var mensagemDeEmail = new MailMessage())
             {
                 mensagemDeEmail.From = new MailAddress(EMAIL_ORIGEM);
+
                 mensagemDeEmail.Subject = message.Subject;
                 mensagemDeEmail.To.Add(message.Destination);
-                message.Body = message.Body;
+                mensagemDeEmail.Body = message.Body;
 
                 //SMTP
                 using (var smtpClient = new SmtpClient())
