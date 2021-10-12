@@ -2,15 +2,8 @@
 
 namespace ByteBank.Forum.ViewModels
 {
-    public class ContaRegistrarViewModel
+    public class ContaLoiginViewModel
     {
-        [Required]
-        public string UserName { get; set; }
-
-        [Required]
-        [Display(Name = "Nome Completo")]
-        public string NomeCompleto { get; set; }
-
         [Required]
         [EmailAddress]
         [Display(Name = "E-mail")]
