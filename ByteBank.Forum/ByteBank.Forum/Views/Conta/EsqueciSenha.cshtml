@@ -1,0 +1,22 @@
+﻿@model ByteBank.Forum.ViewModels.ContaEsqueciSenhaViewModel
+
+@{
+    ViewBag.Title = "EsqueciSenha";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Esqueci Minha Senha</h2>
+<p>
+    Preencha o campo de e-mail com o seu endereço de e-mail cadastrado no fórum,
+    e enviaremos a ele as instruções para você recuperar a sua senha.
+</p>
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+
+    @Html.EditorForModel()
+
+    <br />
+    <input type="submit" value="Enviar" />
+}
