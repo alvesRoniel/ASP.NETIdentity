@@ -30,6 +30,24 @@ namespace ByteBank.Forum.Controllers
             }
         }
 
+        private SignInManager<UsuarioAplicacao, string> _signInManager;
+        public SignInManager<UsuarioAplicacao, string> SignInManager
+        {
+            get
+            {
+                if (_signInManager == null)
+                {
+                    var contextoOwin = HttpContext.GetOwinContext();
+                    _signInManager = contextoOwin.GetUserManager<SignInManager<UsuarioAplicacao, string>>();
+                }
+
+                return _signInManager;
+            }
+            set
+            {
+                _signInManager = value;
+            }
+        }
 
 
         // GET: Conta
@@ -101,7 +119,7 @@ namespace ByteBank.Forum.Controllers
                 $"Bem vindo ao fórum ByteBank, clique aqui {linkDeCallBack} para confirmar seu e-mail!");
         }
 
-        public async Task<ActionResult> Login()
+        public ActionResult Login()
         {
             return View();
         }
@@ -111,9 +129,34 @@ namespace ByteBank.Forum.Controllers
         {
             if (ModelState.IsValid)
             {
+                var usuario = await UserManager.FindByEmailAsync(model.Email);
 
+                if (usuario == null) return SenhaOuUsuarioInvalidos();
+
+                var signInResult =
+                    await SignInManager.PasswordSignInAsync(
+                        usuario.UserName,
+                        model.Senha,
+                        isPersistent: false,
+                        shouldLockout: false
+                    );
+
+                switch (signInResult)
+                {
+                    case SignInStatus.Success:
+                        return RedirectToAction("Index", "Home");
+                    default:
+                        return SenhaOuUsuarioInvalidos();
+                }
             }
+
             return View(model);
+        }
+
+        private ActionResult SenhaOuUsuarioInvalidos()
+        {
+            ModelState.AddModelError("", "Usuário ou senha inválidos!");
+            return View("Login");
         }
 
         private void AdicionarErros(IdentityResult resultado)
