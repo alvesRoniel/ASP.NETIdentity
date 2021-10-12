@@ -181,6 +181,46 @@ namespace ByteBank.Forum.Controllers
             return View(model);
         }
 
+        public ActionResult EsqueciSenha()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> EsqueciSenha(ContaEsqueciSenhaViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var usuario = await UserManager.FindByEmailAsync(model.Email);
+                if (usuario != null)
+                {
+                    //Gera o token de resete da senha
+                    var token = await UserManager.GeneratePasswordResetTokenAsync(usuario.Id);
+
+                    var linkDeCallBack =
+                           Url.Action(
+                               "ConfirmacaoAlteracaoSenha",
+                               "Conta",
+                               new { usuarioId = usuario.Id, token = token },
+                               Request.Url.Scheme);
+
+                    await UserManager.SendEmailAsync(
+                        usuario.Id,
+                        "Fórum ByteBank - Alteração de senha",
+                        $"Bem vindo ao fórum ByteBank, clique aqui {linkDeCallBack} para alterar a sua senha!");
+                }
+
+                return View("EmailAlteracaoSenhaEnviado");
+            }
+
+            return View();
+        }
+
+        public ActionResult ConfirmacaoAlteracaoSenha(string usuarioId, string token)
+        {
+            return View();
+        }
+
         [HttpPost]
         public ActionResult Logoff()
         {
