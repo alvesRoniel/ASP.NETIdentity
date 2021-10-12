@@ -2,6 +2,7 @@
 using ByteBank.Forum.ViewModels;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using System;
 using System.Threading.Tasks;
 using System.Web;
@@ -49,6 +50,14 @@ namespace ByteBank.Forum.Controllers
             }
         }
 
+        public IAuthenticationManager AuthenticationManager
+        {
+            get
+            {
+                var contextoOwin = Request.GetOwinContext();
+                return contextoOwin.Authentication;
+            }
+        }
 
         // GET: Conta
         public ActionResult Registrar()
@@ -151,6 +160,13 @@ namespace ByteBank.Forum.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult Logoff()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            return RedirectToAction("Index", "Home");
         }
 
         private ActionResult SenhaOuUsuarioInvalidos()
